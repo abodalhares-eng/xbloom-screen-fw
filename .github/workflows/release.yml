@@ -1,0 +1,21 @@
+# When version.txt changes on main, publish a release with the OTA image so the screen's
+# «تحديث الشاشة» button (which reads releases/latest/download/...) can see it.
+name: release
+on:
+  push:
+    branches: [main]
+    paths: [version.txt]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=$(tr -d '[:space:]' < version.txt)
+          sha256sum xbloom_screen_ota.bin
+          gh release create "v$V" xbloom_screen_ota.bin version.txt --title "$V" --notes "OTA build $V" --latest
